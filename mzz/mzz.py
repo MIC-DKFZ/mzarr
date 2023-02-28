@@ -28,6 +28,9 @@ class Mzz:
             self.array = self.store["base"]
         return np.array(self.array)
 
+    def attrs(self):
+        return dict(self.store.attrs)
+
     def __getitem__(self, key):
         if self.store is not None:
             self.array = self.store["base"]
