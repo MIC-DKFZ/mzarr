@@ -26,7 +26,12 @@ class Mzz:
     def numpy(self):
         if self.store is not None:
             self.array = self.store["base"]
-        return self.array
+        return np.array(self.array)
+
+    def __getitem__(self, key):
+        if self.store is not None:
+            self.array = self.store["base"]
+        return self.array[key]
 
     def _create_pyramid(self, array, num_pyramids, channel_axis, is_seg, type):
         if num_pyramids is None or num_pyramids == 0:
