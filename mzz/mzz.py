@@ -80,11 +80,11 @@ class Mzz:
             for p, dataset in enumerate(pyramid):
                 if p == 0:
                     path = "base"
-                    lossless = lossless
+                    p_lossless = lossless
                 else:
                     path = "{}_{}".format(pyramid_type, p)
-                    lossless = False
-                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=JpegXl(lossless=lossless))
+                    p_lossless = False
+                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=JpegXl(lossless=p_lossless))
                 series.append({"path": path})
 
             multiscale = {
