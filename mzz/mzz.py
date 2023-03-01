@@ -61,7 +61,7 @@ class Mzz:
             #     sub_sampled_array = pyramid[-1]
             #     for axis in range(len(array.shape)):
             #         if channel_axis is None or axis != channel_axis:
-            #             sub_sampled_array = np.delete(sub_sampled_array, np.s_[::4], axis=axis)
+            #             sub_sampled_array = np.delete(sub_sampled_array, np.s_[::10], axis=axis)
             #     pyramid.append(sub_sampled_array)
 
         else:
@@ -87,9 +87,7 @@ class Mzz:
                 else:
                     path = "{}_{}".format(pyramid_type, p)
                     p_lossless = False
-                if compressor is None:
-                    compressor = JpegXl(lossless=p_lossless)
-                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=compressor, dtype=pyramid[p].dtype)
+                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=JpegXl(lossless=p_lossless), dtype=pyramid[p].dtype)
                 series.append({"path": path})
 
             multiscale = {

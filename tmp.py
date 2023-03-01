@@ -10,6 +10,7 @@ from os.path import join
 from natsort import natsorted
 import os
 import SimpleITK as sitk
+import time
 
 
 def load_nifti(filename, return_meta=False, is_seg=False):
@@ -51,14 +52,16 @@ print("Min: {}, max: {}".format(np.min(array1), np.max(array1)))
 # shutil.rmtree("tmp.zarr")
 
 array2 = Mzz(array1)
+start_time = time.time()
 array2.save("/home/k539i/Documents/datasets/original/2021_Gotkowski_HZDR-HIF/raw_data/2D3D_T1_C1_160kv_15ct.mzz")
+print("Time: ", time.time() - start_time)
 
-array3 = Mzz(path="/home/k539i/Documents/datasets/original/2021_Gotkowski_HZDR-HIF/raw_data/2D3D_T1_C1_160kv_15ct.mzz")
-# print(array2[512:600, 512:600, 512:600])
-array3 = array3.numpy()
-print("Min: {}, max: {}".format(np.min(array3), np.max(array3)))
-print(array3.dtype)
-print(np.array_equal(array1, array3))
+# array3 = Mzz(path="/home/k539i/Documents/datasets/original/2021_Gotkowski_HZDR-HIF/raw_data/2D3D_T1_C1_160kv_15ct.mzz")
+# # print(array2[512:600, 512:600, 512:600])
+# array3 = array3.numpy()
+# print("Min: {}, max: {}".format(np.min(array3), np.max(array3)))
+# print(array3.dtype)
+# print(np.array_equal(array1, array3))
 
 import mzz
 
