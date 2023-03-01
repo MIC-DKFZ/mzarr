@@ -14,11 +14,11 @@ class Mzz:
         if path is not None:
             self.array = self.load(path)
 
-    def save(self, path, properties=None, num_pyramids=4, channel_axis=None, is_seg=False, type="subsampled", lossless=True, chunks=True):
+    def save(self, path, properties=None, num_pyramids=4, channel_axis=None, is_seg=False, type="subsampled", lossless=True, chunks=True, compressor=None):
         if self.store is not None:
             self.array = self.store["base"]
         pyramid = self._create_pyramid(self.array, num_pyramids, channel_axis, is_seg, type)
-        self._save(path, properties, pyramid, type, is_seg, lossless, chunks, channel_axis)
+        self._save(path, properties, pyramid, type, is_seg, lossless, chunks, channel_axis, compressor)
 
     def load(self, path):
         self.store = zarr.open(zarr.ZipStore(path, mode='r'), mode="r")
@@ -69,7 +69,7 @@ class Mzz:
 
         return pyramid
 
-    def _save(self, filepath, properties, pyramid, pyramid_type, is_seg, lossless, chunks, channel_axis):
+    def _save(self, filepath, properties, pyramid, pyramid_type, is_seg, lossless, chunks, channel_axis, compressor):
         if (chunks is None or chunks is True) and channel_axis is not None:
             dtype = normalize_dtype(pyramid[0].dtype, None)[0]
             chunks = guess_chunks(pyramid[0].shape, dtype.itemsize)
@@ -87,7 +87,9 @@ class Mzz:
                 else:
                     path = "{}_{}".format(pyramid_type, p)
                     p_lossless = False
-                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=JpegXl(lossless=p_lossless))
+                if compressor is None:
+                    compressor = JpegXl(lossless=p_lossless)
+                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=compressor, dtype=pyramid[p].dtype)
                 series.append({"path": path})
 
             multiscale = {

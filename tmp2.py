@@ -1,7 +1,16 @@
-import mzz
+from mzz import Mzz
 import numpy as np
+import tifffile
+from numcodecs import Blosc, Zstd
 
-seg = mzz.Mzz()
-seg.load("/home/k539i/Documents/network_drives/cluster-data/original/HMGU_2022_DIADEM/predictions/WSI/nnunetv2/Dataset107_DIADEMv3/train/Insulin/Insulin-CA0120-2021-03-1817-51-58.mzz")
-seg = seg.numpy().astype(np.uint8)
-np.save("/home/k539i/Documents/datasets/original/HMGU_2022_DIADEM/Insulin-CA0120-2021-03-1817-51-58.npy", seg)
+
+# compressor = Zstd(level=15)
+# image = tifffile.imread("/home/k539i/Documents/datasets/original/2021_Gotkowski_HZDR-HIF/raw_data/2D3D_T1_C1_106_160kv_ct55.tif")
+# image = Mzz(image)
+# image.save("/home/k539i/Documents/datasets/original/2021_Gotkowski_HZDR-HIF/raw_data/tmp.mzz", compressor=None)
+
+image2 = Mzz(path="/home/k539i/Documents/datasets/original/2021_Gotkowski_HZDR-HIF/raw_data/tmp.mzz")
+print(image2)
+image2 = image2.numpy()
+print(image2)
+print(image2.sum())
