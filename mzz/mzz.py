@@ -14,6 +14,9 @@ class Mzz:
         if path is not None:
             self.array = self.load(path)
 
+        if self.array is not None:
+            self.shape = self.array.shape
+
     def save(self, path, properties=None, num_pyramids=4, channel_axis=None, is_seg=False, type="subsampled", lossless=True, chunks=True, compressor=None):
         if self.store is not None:
             self.array = self.store["base"]
@@ -22,6 +25,7 @@ class Mzz:
 
     def load(self, path):
         self.store = zarr.open(zarr.ZipStore(path, mode='r'), mode="r")
+        self.shape = self.array.shape
 
     def numpy(self):
         if self.store is not None:
