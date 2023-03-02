@@ -25,7 +25,7 @@ class Mzz:
 
     def load(self, path):
         self.store = zarr.open(zarr.ZipStore(path, mode='r'), mode="r")
-        self.shape = self.array.shape
+        self.shape = self.store.shape
 
     def numpy(self):
         if self.store is not None:
