@@ -12,7 +12,7 @@ class Mzz:
         self.array = array
 
         if path is not None:
-            self.array = self.load(path)
+            self.load(path)
 
         if self.array is not None:
             self.shape = self.array.shape
@@ -25,7 +25,8 @@ class Mzz:
 
     def load(self, path):
         self.store = zarr.open(zarr.ZipStore(path, mode='r'), mode="r")
-        self.shape = self.store.shape
+        self.array = self.store["base"]
+        self.shape = self.array.shape
 
     def numpy(self):
         if self.store is not None:
