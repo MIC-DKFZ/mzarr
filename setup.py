@@ -12,6 +12,6 @@ setup(name='mzz',
             "scikit-image>=0.19",
             "zarr",
             'numcodecs',
-            'imagecodecs'
+            'imagecodecs==2023.1.23'
       ],
       zip_safe=False)

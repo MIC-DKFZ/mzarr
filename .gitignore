@@ -1,2 +1,4 @@
 /mzz.egg-info/
 .idea/
+
+mzz/__pycache__/
