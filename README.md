@@ -8,6 +8,8 @@ Mzz (Multi-Resolution Zipped Zarr) is a Python library for working with the MZZ 
 
 - **Automatic Chunking**: MZZ incorporates automatic chunking for optimal performance. The library intelligently divides the image data into smaller chunks, resulting in fast loading, saving, and manipulation operations. Chunking also enables memory mapping of the image for efficient usage of system resources.
 
+- **Array-Like Slicing**: MZZ supports array-like slicing, allowing users to extract specific regions or subsets of the image data. This feature enables the selection of portions of the image based on desired coordinates, indices, or ranges. Array-like slicing provides flexibility in manipulating and analyzing the image data by operating only on the selected regions of interest. It avoids the need to load the entire dataset into memory, resulting in efficient memory usage and faster processing times.
+
 - **Lossless Compression**: MZZ utilizes the modern lossless JpegXL compressor for compressing the image data on a chunk basis. This compression method offers improved compression benefits compared to other 2D and 3D image formats. The chunk-based compression enables memory mapping of the image while still achieving high compression ratios.
 
 - **Lossy Compression (Optional)**: In addition to lossless compression, MZZ provides an option for using lossy JpegXL compression. This option offers even better compression ratios, which can be advantageous in scenarios where the preservation of every detail is not critical.
