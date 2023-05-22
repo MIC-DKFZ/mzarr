@@ -40,22 +40,26 @@ from mzarr import Mzarr
 image = np.random.random((512, 512))
 
 # Initialize an instance of Mzarr with your image array
-Mzarr = Mzarr(array=image)
+mzarr = Mzarr(image)
+
+# Manipulate the image array using slicing
+mzarr[100:200, 100:200] = 1.0  # Set a 100x100 region to a value of 1.0
 
 # Save the Mzarr instance to disk
-Mzarr.save(path="path/to/save.mzarr")
+mzarr.save(path="path/to/save.mzarr")
 
-# Load an Mzarr instance from disk
-loaded_Mzarr = Mzarr(path="path/to/save.mzarr")
+# Initialize an instance of Mzarr from the saved file
+loaded_mzarr = Mzarr("path/to/save.mzarr")
 
 # Access the image data as a NumPy array
-loaded_image = loaded_Mzarr.numpy()
+loaded_image = loaded_mzarr.numpy()
 
-# Retrieve metadata associated with the Mzarr instance
-metadata = loaded_Mzarr.attrs()
+# Retrieve metadata associated with the Mzarr file
+metadata = loaded_mzarr.attrs()
 
 # Perform operations on the image or metadata as needed
 # ...
+
 ```
 
 For more detailed usage instructions and a complete list of available methods and parameters, please refer to the Mzarr library documentation.

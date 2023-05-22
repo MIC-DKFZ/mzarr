@@ -3,12 +3,28 @@ import zarr
 from zarr.util import guess_chunks, normalize_dtype
 from skimage.transform import pyramid_gaussian
 from imagecodecs.numcodecs import JpegXl
-from typing import Optional, List, Union, Literal
+from typing import Optional, List, Union, Literal, Any
 import os
 
 
 class Mzarr:
-    def __init__(self, store: Union[np.ndarray, str], mode: Literal['r', 'r+', 'a', 'w', 'w-'] = 'a'):
+    def __init__(self, store: Union[np.ndarray, str], mode: Literal['r', 'r+', 'a', 'w', 'w-'] = 'a') -> None:
+        """
+        Initialize the Mzarr instance.
+
+        Args:
+            store (Union[np.ndarray, str]): The array to be handled by the instance, or the
+                path to a Mzarr file to be loaded.
+            mode (Literal['r', 'r+', 'a', 'w', 'w-'], optional): The mode in which to open
+                the Mzarr file. This is only used if `store` is a path.
+                ‘r’ means read only (must exist);
+                ‘r+’ means read/write (must exist);
+                ‘a’ means read/write (create if doesn’t exist);
+                ‘w’ means create (overwrite if exists);
+                ‘w-’ means create (fail if exists).
+                Defaults to 'a'.
+        """
+
         self.path = None
         self.store = None
         self.array = None
@@ -18,13 +34,16 @@ class Mzarr:
         else:
             self.array = store
 
-    def load(self, path: str, mode: Literal['r', 'r+', 'a'] = 'a'):
+    def load(self, path: str, mode: Literal['r', 'r+', 'a', 'a'] = 'a') -> None:
         """
-        Load the Mzarr instance from disk.
+        Load the Mzarr instance from a file on disk.
 
         Args:
-            path (str): The path to load the Mzarr instance from.
+            path (str): The path to the Mzarr file to load.
+            mode (Literal['r', 'r+', 'a', 'a'], optional): The mode in which to open the Mzarr file.
+                Defaults to 'a'.
         """
+
         self.path = path
         self.store = zarr.open(zarr.ZipStore(path, mode=mode), mode=mode)
         self.array = self.store["base"]
@@ -32,29 +51,33 @@ class Mzarr:
     def save(
             self,
             path: str,
-            attrs=None,
+            attrs: Optional[dict] = None,
             num_pyramids: int = 4,
             channel_axis: Optional[int] = None,
             is_seg: bool = False,
-            type: str = "subsampled",
+            type: Literal['subsampled', 'gaussian'] = "subsampled",
             lossless: bool = True,
             chunks: bool = True,
             mode: Literal['r+', 'a', 'w', 'w-'] = 'a',
             overwrite: bool = True
-    ):
+    ) -> None:
         """
-        Save the Mzarr instance to disk.
+        Save the Mzarr instance to a file on disk. This includes creating a pyramid of images,
+        and writing the pyramid along with metadata to disk.
 
         Args:
-            path (str): The path to save the Mzarr instance to.
-            attrs: Additional attributes to be saved.
-            num_pyramids (int): The number of pyramids to create. Defaults to 4.
-            channel_axis (int, optional): The axis representing channels. Defaults to None.
-            is_seg (bool): Whether the array is a segmentation mask. Defaults to False.
-            type (str): The type of pyramid to create ("gaussian" or "subsampled"). Defaults to "subsampled".
-            lossless (bool): Whether to use lossless compression. Defaults to True.
-            chunks (bool): Whether to use chunked storage. Defaults to True.
+            path (str): The path to save the Mzarr file to.
+            attrs (dict, optional): Additional attributes to be saved in the Mzarr file. Defaults to None.
+            num_pyramids (int, optional): The number of pyramid levels to create. Defaults to 4.
+            channel_axis (int, optional): The axis of the array representing channels. Defaults to None.
+            is_seg (bool, optional): Whether the array represents a segmentation mask. Defaults to False.
+            type (str, optional): The type of pyramid to create ("gaussian" or "subsampled"). Defaults to "subsampled".
+            lossless (bool, optional): Whether to use lossless compression. Defaults to True.
+            chunks (bool, optional): Whether to use chunked storage. Defaults to True.
+            mode (Literal['r+', 'a', 'w', 'w-'], optional): The mode in which to open the Mzarr file. Defaults to 'a'.
+            overwrite (bool, optional): Whether to overwrite an existing file at the same path. Defaults to True.
         """
+
         pyramid = self._create_pyramid(self.array, num_pyramids, channel_axis, is_seg, type)
         self._save(path, attrs, pyramid, type, is_seg, lossless, chunks, channel_axis, mode, overwrite)
 
@@ -62,12 +85,20 @@ class Mzarr:
         """
         Get a NumPy array representation of the Mzarr instance.
 
+        This method returns a copy of the base array of the Mzarr instance as a NumPy array.
+
         Returns:
             np.ndarray: The NumPy array representation of the Mzarr instance.
         """
         return np.array(self.array)
 
-    def close(self):
+    def close(self) -> None:
+        """
+        Close the Mzarr file associated with the Mzarr instance.
+
+        This method closes the underlying ZipStore associated with the Mzarr instance.
+        """
+
         self.store.store.close()
 
     def attrs(self) -> dict:
@@ -79,48 +110,85 @@ class Mzarr:
         """
         return dict(self.store.attrs)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: Union[int, slice]) -> np.ndarray:
         """
-        Get an item from the Mzarr instance.
+        Get an item or a slice from the base array of the Mzarr instance.
+
+        This method supports integer and slice indexing with the same semantics as NumPy arrays.
 
         Args:
-            key: The key to access the item.
+            key (Union[int, slice]): The index or slice to access in the base array.
 
         Returns:
-            Any: The item corresponding to the key.
+            np.ndarray: The item or slice from the base array corresponding to the key.
         """
+
         return self.array[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Union[int, slice], value: np.ndarray) -> None:
+        """
+        Set an item or a slice in the base array of the Mzarr instance.
+
+        This method supports integer and slice indexing with the same semantics as NumPy arrays.
+
+        Args:
+            key (Union[int, slice]): The index or slice to access in the base array.
+            value (np.ndarray): The value to set at the specified index or slice.
+        """
+
         self.array.__setitem__(key, value)
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: str) -> Any:
+        """
+        Get a named attribute from the base array of the Mzarr instance.
+
+        This method is called when an attribute lookup has not found the attribute in the usual places
+        (i.e., it is not an instance attribute nor is it found in the class tree for self). name is the
+        attribute name. This method should return the (computed) attribute value or raise an AttributeError exception.
+
+        Args:
+            name (str): The name of the attribute.
+
+        Returns:
+            Any: The attribute value.
+        """
+
         return getattr(self.array, name)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """
+        Get a string representation of the Mzarr instance.
+
+        Returns:
+            str: The string representation of the Mzarr instance.
+        """
+
         return repr(self.array[...])
 
-    def _create_pyramid(self, array: np.ndarray,
+    def _create_pyramid(self,
+                        array: np.ndarray,
                         num_pyramids: int,
                         channel_axis: Optional[int],
                         is_seg: bool,
-                        type: str
+                        type: Literal['subsampled', 'gaussian']
                         ) -> List[np.ndarray]:
         """
         Create a pyramid from the given array.
 
+        This method generates a pyramid of images from the given input array. The pyramid
+        can be of "gaussian" or "subsampled" type and will contain 'num_pyramids' levels.
+
         Args:
             array (np.ndarray): The input array.
-            num_pyramids (int): The number of pyramids to create.
-            channel_axis (Optional[int]): The axis representing channels.
-            is_seg (bool): Whether the array is a segmentation mask.
+            num_pyramids (int): The number of pyramid levels to create.
+            channel_axis (Optional[int]): The axis representing channels in the array.
+            is_seg (bool): Indicates if the array is a segmentation mask.
             type (str): The type of pyramid to create ("gaussian" or "subsampled").
 
         Returns:
             List[np.ndarray]: The pyramid of arrays.
-        Raises:
-            RuntimeError: If an unknown pyramid type is specified.
         """
+
         if num_pyramids is None or num_pyramids == 0:
             return [array]
         if type == "gaussian":
@@ -129,7 +197,7 @@ class Mzarr:
                 order = 0
             pyramid = list(pyramid_gaussian(array, downscale=2, max_layer=num_pyramids, channel_axis=channel_axis, order=order, preserve_range=True))
             pyramid = [p.astype(array.dtype) for p in pyramid]
-        elif type == "subsampled":
+        else:
             pyramid = [array]
             if channel_axis is not None and channel_axis < 0:
                 channel_axis = len(array.shape) + channel_axis
@@ -142,37 +210,42 @@ class Mzarr:
             for _ in range(num_pyramids):
                 pyramid.append(pyramid[-1][tuple(slices)])
 
-        else:
-            raise RuntimeError("Unknown pyramid type.")
-
         return pyramid
 
-    def _save(
-            self,
-            path: str,
-            attrs,
-            pyramid: List[np.ndarray],
-            pyramid_type: str,
-            is_seg: bool,
-            lossless: bool,
-            chunks: bool,
-            channel_axis: Optional[int],
-            mode: Literal['r+', 'a', 'w', 'w-'] = 'a',
-            overwrite: bool = True
-    ):
+    def _save(self,
+              path: str,
+              attrs: Optional[dict],
+              pyramid: List[np.ndarray],
+              pyramid_type: Literal['subsampled', 'gaussian'],
+              is_seg: bool,
+              lossless: bool,
+              chunks: bool,
+              channel_axis: Optional[int],
+              mode: Literal['r+', 'a', 'w', 'w-'] = 'a',
+              overwrite: bool = True
+              ) -> None:
         """
         Save the Mzarr instance to disk.
 
+        This method saves the pyramid of images along with associated attributes to
+        a specified location in a disk. It also manages compression and chunking options.
+
         Args:
             path (str): The path to save the Mzarr instance to.
-            attrs: Additional attributes to be saved.
+            attrs (Optional[dict]): Additional attributes to be saved.
             pyramid (List[np.ndarray]): The pyramid of arrays to be saved.
-            pyramid_type (str): The type of pyramid to create ("gaussian" or "subsampled").
+            pyramid_type (str): The type of pyramid ("gaussian" or "subsampled").
             is_seg (bool): Whether the array is a segmentation mask.
             lossless (bool): Whether to use lossless compression.
             chunks (bool): Whether to use chunked storage.
-            channel_axis (Optional[int]): The axis representing channels.
+            channel_axis (Optional[int]): The axis representing channels in the array.
+            mode (Literal['r+', 'a', 'w', 'w-']): The mode in which to open the Mzarr file. Default is 'a'.
+            overwrite (bool): Whether to overwrite an existing Mzarr file at the same path.
+
+        Raises:
+            RuntimeError: If a file already exists at the specified path and 'overwrite' is set to False.
         """
+
         if os.path.exists(path) and overwrite:
             os.remove(path)
         elif os.path.exists(path):
@@ -214,4 +287,3 @@ class Mzarr:
         zip_store.close()
 
         self.store = grp
-        print("")
