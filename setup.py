@@ -5,7 +5,7 @@ setup(name='mzz',
       version='0.0.1',
       description='none',
       url='127.0.0.1',
-      author_email='karol.gotkowski@dkfz-heidelberg.de', # will be adapted to team email shortly
+      author_email='karol.gotkowski@dkfz.de',
       license='Apache License, Version 2.0',
       install_requires=[
             "numpy",
