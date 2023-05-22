@@ -3,44 +3,51 @@ import zarr
 from zarr.util import guess_chunks, normalize_dtype
 from skimage.transform import pyramid_gaussian
 from imagecodecs.numcodecs import JpegXl
-from typing import Optional, List
+from typing import Optional, List, Union, Literal
+import os
 
 
-class Mzz:
-    def __init__(self, array: Optional[np.ndarray] = None, path: Optional[str] = None):
+class Mzarr:
+    def __init__(self, store: Union[np.ndarray, str], mode: Literal['r', 'r+', 'a', 'w', 'w-'] = 'a'):
+        self.path = None
+        self.store = None
+        self.array = None
+
+        if isinstance(store, str):
+            self.load(store, mode)
+        else:
+            self.array = store
+
+    def load(self, path: str, mode: Literal['r', 'r+', 'a'] = 'a'):
         """
-        Initialize an instance of Mzz.
+        Load the Mzarr instance from disk.
 
         Args:
-            array (np.ndarray, optional): The array to be stored. Defaults to None.
-            path (str, optional): The path to load the array from. Defaults to None.
+            path (str): The path to load the Mzarr instance from.
         """
-        self.store = None
-        self.array = array
-
-        if path is not None:
-            self.load(path)
-
-        if self.array is not None:
-            self.shape = self.array.shape
+        self.path = path
+        self.store = zarr.open(zarr.ZipStore(path, mode=mode), mode=mode)
+        self.array = self.store["base"]
 
     def save(
             self,
             path: str,
-            properties=None,
+            attrs=None,
             num_pyramids: int = 4,
             channel_axis: Optional[int] = None,
             is_seg: bool = False,
             type: str = "subsampled",
             lossless: bool = True,
-            chunks: bool = True
+            chunks: bool = True,
+            mode: Literal['r+', 'a', 'w', 'w-'] = 'a',
+            overwrite: bool = True
     ):
         """
-        Save the Mzz instance to disk.
+        Save the Mzarr instance to disk.
 
         Args:
-            path (str): The path to save the Mzz instance to.
-            properties: Additional properties to be saved.
+            path (str): The path to save the Mzarr instance to.
+            attrs: Additional attributes to be saved.
             num_pyramids (int): The number of pyramids to create. Defaults to 4.
             channel_axis (int, optional): The axis representing channels. Defaults to None.
             is_seg (bool): Whether the array is a segmentation mask. Defaults to False.
@@ -48,45 +55,33 @@ class Mzz:
             lossless (bool): Whether to use lossless compression. Defaults to True.
             chunks (bool): Whether to use chunked storage. Defaults to True.
         """
-        if self.store is not None:
-            self.array = self.store["base"]
         pyramid = self._create_pyramid(self.array, num_pyramids, channel_axis, is_seg, type)
-        self._save(path, properties, pyramid, type, is_seg, lossless, chunks, channel_axis)
-
-    def load(self, path: str):
-        """
-        Load the Mzz instance from disk.
-
-        Args:
-            path (str): The path to load the Mzz instance from.
-        """
-        self.store = zarr.open(zarr.ZipStore(path, mode='r'), mode="r")
-        self.array = self.store["base"]
-        self.shape = self.array.shape
+        self._save(path, attrs, pyramid, type, is_seg, lossless, chunks, channel_axis, mode, overwrite)
 
     def numpy(self) -> np.ndarray:
         """
-        Get a NumPy array representation of the Mzz instance.
+        Get a NumPy array representation of the Mzarr instance.
 
         Returns:
-            np.ndarray: The NumPy array representation of the Mzz instance.
+            np.ndarray: The NumPy array representation of the Mzarr instance.
         """
-        if self.store is not None:
-            self.array = self.store["base"]
         return np.array(self.array)
+
+    def close(self):
+        self.store.store.close()
 
     def attrs(self) -> dict:
         """
-        Get the attributes of the Mzz instance.
+        Get the attributes of the Mzarr instance.
 
         Returns:
-            dict: The attributes of the Mzz instance.
+            dict: The attributes of the Mzarr instance.
         """
         return dict(self.store.attrs)
 
     def __getitem__(self, key):
         """
-        Get an item from the Mzz instance.
+        Get an item from the Mzarr instance.
 
         Args:
             key: The key to access the item.
@@ -94,9 +89,16 @@ class Mzz:
         Returns:
             Any: The item corresponding to the key.
         """
-        if self.store is not None:
-            self.array = self.store["base"]
         return self.array[key]
+
+    def __setitem__(self, key, value):
+        self.array.__setitem__(key, value)
+
+    def __getattr__(self, name):
+        return getattr(self.array, name)
+
+    def __repr__(self):
+        return repr(self.array[...])
 
     def _create_pyramid(self, array: np.ndarray,
                         num_pyramids: int,
@@ -139,12 +141,6 @@ class Mzz:
                     slices.append(slice(None, None, None))
             for _ in range(num_pyramids):
                 pyramid.append(pyramid[-1][tuple(slices)])
-            # for _ in range(num_pyramids):
-            #     sub_sampled_array = pyramid[-1]
-            #     for axis in range(len(array.shape)):
-            #         if channel_axis is None or axis != channel_axis:
-            #             sub_sampled_array = np.delete(sub_sampled_array, np.s_[::10], axis=axis)
-            #     pyramid.append(sub_sampled_array)
 
         else:
             raise RuntimeError("Unknown pyramid type.")
@@ -153,21 +149,23 @@ class Mzz:
 
     def _save(
             self,
-            filepath: str,
-            properties,
+            path: str,
+            attrs,
             pyramid: List[np.ndarray],
             pyramid_type: str,
             is_seg: bool,
             lossless: bool,
             chunks: bool,
             channel_axis: Optional[int],
+            mode: Literal['r+', 'a', 'w', 'w-'] = 'a',
+            overwrite: bool = True
     ):
         """
-        Save the Mzz instance to disk.
+        Save the Mzarr instance to disk.
 
         Args:
-            filepath (str): The path to save the Mzz instance to.
-            properties: Additional properties to be saved.
+            path (str): The path to save the Mzarr instance to.
+            attrs: Additional attributes to be saved.
             pyramid (List[np.ndarray]): The pyramid of arrays to be saved.
             pyramid_type (str): The type of pyramid to create ("gaussian" or "subsampled").
             is_seg (bool): Whether the array is a segmentation mask.
@@ -175,35 +173,45 @@ class Mzz:
             chunks (bool): Whether to use chunked storage.
             channel_axis (Optional[int]): The axis representing channels.
         """
+        if os.path.exists(path) and overwrite:
+            os.remove(path)
+        elif os.path.exists(path):
+            raise RuntimeError("A file already exists under {}".format(path))
+
         if (chunks is None or chunks is True) and channel_axis is not None:
             dtype = normalize_dtype(pyramid[0].dtype, None)[0]
             chunks = guess_chunks(pyramid[0].shape, dtype.itemsize)
             chunks = list(chunks)
             chunks[channel_axis] = pyramid[0].shape[channel_axis]
             chunks = tuple(chunks)
-        with zarr.ZipStore(filepath, compression=0, mode='w') as store:
-            grp = zarr.group(store)
 
-            series = []
-            for p, dataset in enumerate(pyramid):
-                if p == 0:
-                    path = "base"
-                    p_lossless = lossless
-                else:
-                    path = "{}_{}".format(pyramid_type, p)
-                    p_lossless = False
-                grp.create_dataset(path, data=pyramid[p], chunks=chunks, compressor=JpegXl(lossless=p_lossless), dtype=pyramid[p].dtype)
-                series.append({"path": path})
+        zip_store = zarr.ZipStore(path, compression=0, mode=mode)
+        grp = zarr.group(zip_store)
 
-            multiscale = {
-                "version": "0.1",
-                "datasets": series,
-                "type": pyramid_type,
-            }
+        series = []
+        for p, dataset in enumerate(pyramid):
+            if p == 0:
+                resolution_path = "base"
+                p_lossless = lossless
+            else:
+                resolution_path = "{}_{}".format(pyramid_type, p)
+                p_lossless = False
+            grp.create_dataset(resolution_path, data=pyramid[p], chunks=chunks, compressor=JpegXl(lossless=p_lossless), dtype=pyramid[p].dtype)
+            series.append({"path": resolution_path})
 
-            grp.attrs["multiscale"] = multiscale
-            grp.attrs["seg"] = is_seg
-            grp.attrs['properties'] = properties
-            grp.attrs["lossless"] = lossless
-            grp.attrs["channel_axis"] = channel_axis
-            grp.attrs["num_spatial"] = len(pyramid[0].shape) if channel_axis is None else len(pyramid[0].shape) - 1
+        multiscale = {
+            "version": "0.1",
+            "datasets": series,
+            "type": pyramid_type,
+        }
+
+        grp.attrs["multiscale"] = multiscale
+        grp.attrs["seg"] = is_seg
+        grp.attrs['attrs'] = attrs
+        grp.attrs["lossless"] = lossless
+        grp.attrs["channel_axis"] = channel_axis
+        grp.attrs["num_spatial"] = len(pyramid[0].shape) if channel_axis is None else len(pyramid[0].shape) - 1
+        zip_store.close()
+
+        self.store = grp
+        print("")

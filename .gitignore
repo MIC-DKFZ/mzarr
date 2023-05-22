@@ -1,4 +1,6 @@
 /mzz.egg-info/
 .idea/
 
-mzz/__pycache__/
+mzarr/__pycache__/
+
+tests/__pycache__/
