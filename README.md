@@ -4,7 +4,7 @@ Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr ima
 
 ## Features
 
-- **Multi-Resolution Views**: Mzarr supports multi-resolution representations of image data, allowing fast and efficient viewing at different levels of detail. This feature enables quick navigation and exploration of large images.
+- **Multi-Resolution Views**: Mzarr supports multi-resolution representations of image data, allowing fast and efficient viewing at different levels of detail. This feature enables quick navigation and exploration of large images. Typically, this creates only a ~10% overhead.
 
 - **Automatic Chunking**: Mzarr incorporates automatic chunking for optimal performance. The library intelligently divides the image data into smaller chunks, resulting in fast loading, saving, and manipulation operations. Chunking also enables memory mapping of the image for efficient usage of system resources.
 
