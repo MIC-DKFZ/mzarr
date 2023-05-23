@@ -1,5 +1,5 @@
 import numcodecs
 from imagecodecs.numcodecs import JpegXl
-from mzz.mzz import Mzz
+from mzarr.mzarr import Mzarr
 
 numcodecs.register_codec(JpegXl)
