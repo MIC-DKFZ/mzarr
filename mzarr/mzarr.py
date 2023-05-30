@@ -17,11 +17,11 @@ class Mzarr:
                 path to a Mzarr file to be loaded.
             mode (Literal['r', 'r+', 'a', 'w', 'w-'], optional): The mode in which to open
                 the Mzarr file. This is only used if `store` is a path.
-                ‘r’ means read only (must exist);
-                ‘r+’ means read/write (must exist);
-                ‘a’ means read/write (create if doesn’t exist);
-                ‘w’ means create (overwrite if exists);
-                ‘w-’ means create (fail if exists).
+                'r' means read only (must exist);
+                'r+' means read/write (must exist);
+                'a' means read/write (create if doesn't exist);
+                'w' means create (overwrite if exists);
+                'w-' means create (fail if exists).
                 Defaults to 'a'.
         """
 
