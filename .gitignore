@@ -4,3 +4,5 @@
 mzarr/__pycache__/
 
 tests/__pycache__/
+
+mzarr.egg-info/
