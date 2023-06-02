@@ -4,7 +4,7 @@ from os.path import join
 import os
 from natsort import natsorted
 import SimpleITK as sitk
-from mzarr.mzarr import Mzarr
+from mzarr import Mzarr
 import numpy as np
 from typing import Union, Tuple
 

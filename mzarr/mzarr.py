@@ -5,7 +5,10 @@ from skimage.transform import pyramid_gaussian
 from imagecodecs.numcodecs import JpegXl
 from typing import Optional, List, Union, Literal, Any
 import os
+import numcodecs
 
+
+numcodecs.register_codec(JpegXl)
 
 class Mzarr:
     def __init__(self, store: Union[np.ndarray, str], mode: Literal['r', 'r+', 'a', 'w', 'w-'] = 'a') -> None:
@@ -32,7 +35,10 @@ class Mzarr:
         if isinstance(store, str):
             self.load(store, mode)
         else:
-            self.array = store
+            if store.dtype in [np.uint8, np.uint16, np.float16, np.float32]:
+                self.array = store
+            else:
+                raise RuntimeError("Currently only the dtypes 'uint8', 'uint16', 'float16', 'float32' are supported. Dtype {} is not supported".format(store.dtype))
 
     def load(self, path: str, mode: Literal['r', 'r+', 'a', 'a'] = 'a') -> None:
         """

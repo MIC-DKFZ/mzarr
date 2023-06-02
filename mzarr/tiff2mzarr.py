@@ -4,7 +4,7 @@ import os
 from os.path import join
 from natsort import natsorted
 import tifffile
-from mzarr.mzarr import Mzarr
+from mzarr import Mzarr
 import numpy as np
 
 
