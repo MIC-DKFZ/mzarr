@@ -26,7 +26,7 @@ Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr ima
 
 ## Installation
 
-You can install `Mzarr` via [pip]:
+You can install `Mzarr` via [pip](https://pypi.org/project/Mzarr/):
 
     pip install Mzarr
 
