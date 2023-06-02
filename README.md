@@ -1,10 +1,10 @@
 # Mzarr
 
-[![License Apache Software License 2.0](https://img.shields.io/pypi/l/Mzarr.svg?color=green)](https://github.com/Karol-G/Mzarr/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/Mzarr.svg?color=green)](https://pypi.org/project/Mzarr)
-[![Python Version](https://img.shields.io/pypi/pyversions/Mzarr.svg?color=green)](https://python.org)
-[![tests](https://github.com/Karol-G/Mzarr/workflows/tests/badge.svg)](https://github.com/Karol-G/Mzarr/actions)
-[![codecov](https://codecov.io/gh/Karol-G/Mzarr/branch/main/graph/badge.svg)](https://codecov.io/gh/Karol-G/Mzarr)
+[![License Apache Software License 2.0](https://img.shields.io/pypi/l/mzarr.svg?color=green)](https://github.com/Karol-G/mzarr/raw/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/mzarr.svg?color=green)](https://pypi.org/project/mzarr)
+[![Python Version](https://img.shields.io/pypi/pyversions/mzarr.svg?color=green)](https://python.org)
+[![tests](https://github.com/Karol-G/mzarr/workflows/tests/badge.svg)](https://github.com/Karol-G/mzarr/actions)
+[![codecov](https://codecov.io/gh/Karol-G/mzarr/branch/main/graph/badge.svg)](https://codecov.io/gh/Karol-G/mzarr)
 
 Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr image format, designed specifically for 2D and 3D data. Mzarr provides a comprehensive solution for storing, compressing, and efficiently manipulating image data with multi-resolution views. This readme provides an overview of the Mzarr library and its key features.
 
@@ -26,7 +26,7 @@ Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr ima
 
 ## Installation
 
-You can install `mzarr` via [pip](https://pypi.org/project/Mzarr/):
+You can install `mzarr` via [pip](https://pypi.org/project/mzarr/):
 
     pip install mzarr
 
