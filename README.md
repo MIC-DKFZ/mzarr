@@ -3,7 +3,6 @@
 [![License Apache Software License 2.0](https://img.shields.io/pypi/l/mzarr.svg?color=green)](https://github.com/Karol-G/mzarr/raw/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/mzarr.svg?color=green)](https://pypi.org/project/mzarr)
 [![Python Version](https://img.shields.io/pypi/pyversions/mzarr.svg?color=green)](https://python.org)
-[![tests](https://github.com/Karol-G/mzarr/workflows/tests/badge.svg)](https://github.com/Karol-G/mzarr/actions)
 [![codecov](https://codecov.io/gh/Karol-G/mzarr/branch/main/graph/badge.svg)](https://codecov.io/gh/Karol-G/mzarr)
 
 Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr image format, designed specifically for 2D and 3D data. Mzarr provides a comprehensive solution for storing, compressing, and efficiently manipulating image data with multi-resolution views. This readme provides an overview of the Mzarr library and its key features.
@@ -12,7 +11,7 @@ Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr ima
 
 - **Multi-Resolution Views**: Mzarr supports multi-resolution representations of image data, allowing fast and efficient viewing at different levels of detail. This feature enables quick navigation and exploration of large images. Typically, this creates only a ~10% overhead.
 
-  **Low Memory Consumption** Mzarr requires almost no memory even when loading and vieweing large multi-dimensional images due to memory-mapping, chunking and its multi-resolution views.
+- **Low Memory Consumption** Mzarr requires almost no memory even when loading and vieweing large multi-dimensional images due to memory-mapping, chunking and its multi-resolution views.
 
 - **Automatic Chunking**: Mzarr incorporates automatic chunking for optimal performance. The library intelligently divides the image data into smaller chunks, resulting in fast loading, saving, and manipulation operations. Chunking also enables memory mapping of the image for efficient usage of system resources.
 
