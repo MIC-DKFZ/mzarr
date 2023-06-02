@@ -26,15 +26,9 @@ Mzarr (Multi-Resolution Zarr) is a Python library for working with the Mzarr ima
 
 ## Installation
 
-To use the Mzarr library, follow these steps:
+You can install `Mzarr` via [pip]:
 
-1. Ensure that Python 3.6 or later is installed on your system.
-2. Install the required dependencies by running the following command:
-```
-pip install numpy zarr scikit-image imagecodecs
-```
-3. Download the Mzarr library from the official repository: [Mzarr Library](https://github.com/example/Mzarr-library).
-4. Extract the library files to your desired location.
+    pip install Mzarr
 
 ## Getting Started
 
