@@ -6,6 +6,7 @@ from imagecodecs.numcodecs import JpegXl
 from typing import Optional, List, Union, Literal, Any
 import os
 import numcodecs
+from pathlib import Path
 
 
 numcodecs.register_codec(JpegXl)
@@ -32,7 +33,7 @@ class Mzarr:
         self.store = None
         self.array = None
 
-        if isinstance(store, str):
+        if isinstance(store, str) or isinstance(store, Path):
             self.load(store, mode)
         else:
             if store.dtype in [np.uint8, np.uint16, np.float16, np.float32]:
